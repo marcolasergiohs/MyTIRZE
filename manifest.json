@@ -1,0 +1,22 @@
+{
+  "name": "DOSECERTA",
+  "short_name": "DoseCerta",
+  "start_url": "https://marcolasergiohs.github.io/MyTIRZE/",
+  "display": "standalone",
+  "background_color": "#fff",
+  "theme_color": "#0f766e",
+  "lang": "pt",
+  "categories": [
+    "beauty",
+    "security"
+"icons": [
+  {
+      "src": "C:\Users\marco\Desktop\app\DOSECERTA-PWA\icons\androidlauncher\icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+  }
+]
+
+  ]
+}
