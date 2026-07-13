@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DOSECERTA</title>
+<!-- Tailwind CSS para Estilização Moderna -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Font Awesome para Ícones -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- Chart.js para os Gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        /* Estilos para animação da seringa */
+        .syringe-fluid {
+            transition: height 0.5s ease-out, y 0.5s ease-out;
+        }
+        .syringe-plunger {
+            transition: transform 0.5s ease-out;
+        }
+    </style>
+<link href="manifest.json" rel="manifest"/><meta content="#0f766e" name="theme-color"/><meta content="yes" name="mobile-web-app-capable"/><meta content="yes" name="apple-mobile-web-app-capable"/><meta content="default" name="apple-mobile-web-app-status-bar-style"/></head>
+<body class="min-h-screen text-slate-800 pb-12">
+<header class="bg-gradient-to-r from-teal-600 to-emerald-700 text-white shadow-lg sticky top-0 z-50">
+<div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-white/20 p-2 rounded-xl">
+<i class="fa-solid fa-calculator text-2xl text-emerald-100"></i>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight">DOSECERTA</h1>
+<p class="text-[10px] text-emerald-100 uppercase tracking-wider font-semibold">Painel Avançado &amp; Guia de Aspiração</p>
+</div>
+</div>
+<!-- Menu Responsivo -->
+<div class="flex flex-wrap gap-1 bg-teal-800/40 p-1.5 rounded-xl border border-white/10 max-w-full overflow-x-auto">
+<button class="tab-btn px-3 py-1.5 rounded-lg bg-white/20 font-medium text-xs transition-all hover:bg-white/30 flex items-center gap-1.5" id="btn-dashboard" onclick="switchTab('dashboard')">
+<i class="fa-solid fa-chart-line"></i>Painel
+                </button>
+<button class="tab-btn px-3 py-1.5 rounded-lg bg-white/10 font-medium text-xs transition-all hover:bg-white/20 flex items-center gap-1.5" id="btn-novo-registro" onclick="switchTab('novo-registro')">
+<i class="fa-solid fa-plus"></i>Registrar
+                </button>
+<button class="tab-btn px-3 py-1.5 rounded-lg bg-white/10 font-medium text-xs transition-all hover:bg-white/20 flex items-center gap-1.5" id="btn-seringa" onclick="switchTab('seringa')">
+<i class="fa-solid fa-syringe text-amber-300"></i>Seringa Interativa
+                </button>
+<button class="tab-btn px-3 py-1.5 rounded-lg bg-white/10 font-medium text-xs transition-all hover:bg-white/20 flex items-center gap-1.5" id="btn-ai-companion" onclick="switchTab('ai-companion')">
+<i class="fa-solid fa-robot text-teal-300"></i>Análise IA
+                </button>
+<button class="tab-btn px-3 py-1.5 rounded-lg bg-white/10 font-medium text-xs transition-all hover:bg-white/20 flex items-center gap-1.5" id="btn-google-config" onclick="switchTab('google-config')">
+<i class="fa-brands fa-google"></i>Planilha
+                </button>
+<button class="px-3 py-1.5 rounded-lg bg-rose-500/80 hover:bg-rose-500 font-medium text-xs transition-all flex items-center gap-1.5" onclick="reiniciarAplicativo()">
+<i class="fa-solid fa-power-off"></i>Reiniciar
+                </button>
+</div>
+</div>
+</header>
+<main class="max-w-6xl mx-auto px-4 mt-8">
+<!-- ================= ABA 1: DASHBOARD ================= -->
+<section class="space-y-6" id="tab-dashboard">
+<!-- Cards de Resumos de Dados Estendidos -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="glass-card p-4 rounded-2xl shadow-sm flex items-center justify-between">
+<div>
+<p class="text-xs text-slate-500 font-medium">Peso Atual</p>
+<h3 class="text-xl font-bold text-slate-800 mt-1" id="stat-peso-atual">-- kg</h3>
+<p class="text-[10px] text-rose-500 font-bold mt-1" id="stat-eliminado">--</p>
+</div>
+<div class="bg-emerald-50 text-emerald-600 p-3 rounded-xl hidden sm:block">
+<i class="fa-solid fa-weight-scale text-lg"></i>
+</div>
+</div>
+<div class="glass-card p-4 rounded-2xl shadow-sm flex items-center justify-between">
+<div>
+<p class="text-xs text-slate-500 font-medium">Consumo de Água</p>
+<h3 class="text-xl font-bold text-blue-600 mt-1" id="stat-agua">-- L</h3>
+<p class="text-[10px] text-slate-400 mt-1">Meta diária: 2.5L</p>
+</div>
+<div class="bg-blue-50 text-blue-600 p-3 rounded-xl hidden sm:block">
+<i class="fa-solid fa-droplet text-lg"></i>
+</div>
+</div>
+<div class="glass-card p-4 rounded-2xl shadow-sm flex items-center justify-between">
+<div>
+<p class="text-xs text-slate-500 font-medium">Meta de Proteína</p>
+<h3 class="text-xl font-bold text-amber-600 mt-1" id="stat-proteina">-- g</h3>
+<p class="text-[10px] text-slate-400 mt-1">Preserva massa magra</p>
+</div>
+<div class="bg-amber-50 text-amber-600 p-3 rounded-xl hidden sm:block">
+<i class="fa-solid fa-egg text-lg"></i>
+</div>
+</div>
+<div class="glass-card p-4 rounded-2xl shadow-sm flex items-center justify-between">
+<div>
+<p class="text-xs text-slate-500 font-medium">Trânsito Intestinal</p>
+<h3 class="text-sm font-bold text-indigo-600 mt-2" id="stat-intestino">Nenhum Registro</h3>
+<p class="text-[10px] text-slate-400 mt-1">Frequência</p>
+</div>
+<div class="bg-indigo-50 text-indigo-600 p-3 rounded-xl hidden sm:block">
+<i class="fa-solid fa-stethoscope text-lg"></i>
+</div>
+</div>
+</div>
+<!-- Gráfico e Rotação Avançada -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Painel do Gráfico -->
+<div class="glass-card p-6 rounded-2xl shadow-sm lg:col-span-2 flex-col justify-between hidden" id="chart-panel">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-bold text-base text-slate-800"><i class="fa-solid fa-chart-line text-teal-600 mr-2"></i>Evolução de Peso e Meta de Proteína</h3>
+<span class="text-[10px] text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">Análise Semanal</span>
+</div>
+<div class="h-80 w-full">
+<canvas id="weightChart"></canvas>
+</div>
+</div>
+<!-- Estado vazio do gráfico -->
+<div class="glass-card p-6 rounded-2xl shadow-sm lg:col-span-2 flex flex-col items-center justify-center text-center min-h-[360px]" id="chart-empty">
+<i class="fa-solid fa-chart-line text-4xl text-slate-300 mb-3"></i>
+<h3 class="font-bold text-base text-slate-700">Nenhum dado ainda</h3>
+<p class="text-xs text-slate-400 mt-1 max-w-xs">Adicione seu primeiro registro em <span class="font-semibold text-teal-600">Registrar</span> para ver a evolução de peso e proteína.</p>
+</div>
+<!-- Painel Clínico de Sintomas e Aplicação -->
+<div class="glass-card p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-base text-slate-800 mb-1"><i class="fa-solid fa-shield-halved text-rose-500 mr-2"></i>Prevenção de Colaterais</h3>
+<p class="text-[11px] text-slate-500 mb-4">O mapa de rodízio auxilia o controle clínico para reduzir reações locais e sistêmicas.</p>
+<div class="flex justify-center my-4">
+<!-- Diagrama Corporal Otimizado -->
+<div class="relative w-44 h-56 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col items-center justify-around py-3">
+<span class="absolute top-1 text-[8px] font-bold text-slate-400 uppercase tracking-wider">Esquema de Rodízio</span>
+<div class="flex justify-between w-full px-3">
+<div class="body-part w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-[8px] font-bold bg-white text-slate-600" id="body-arm-l">BE</div>
+<div class="w-10 h-5 bg-slate-200 rounded-full flex items-center justify-center text-[8px] font-semibold text-slate-500">Tórax</div>
+<div class="body-part w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-[8px] font-bold bg-white text-slate-600" id="body-arm-r">BD</div>
+</div>
+<div class="flex justify-center gap-3">
+<div class="body-part w-8 h-8 rounded-full border border-slate-300 flex items-center justify-center text-[8px] font-bold bg-white text-slate-600" id="body-abs-l">AE</div>
+<div class="body-part w-8 h-8 rounded-full border border-slate-300 flex items-center justify-center text-[8px] font-bold bg-white text-slate-600" id="body-abs-r">AD</div>
+</div>
+<div class="flex justify-center gap-4">
+<div class="body-part w-8 h-10 rounded-xl border border-slate-300 flex items-center justify-center text-[8px] font-bold bg-white text-slate-600" id="body-thigh-l">CE</div>
+<div class="body-part w-8 h-10 rounded-xl border border-slate-300 flex items-center justify-center text-[8px] font-bold bg-white text-slate-600" id="body-thigh-r">CD</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-teal-50 border border-teal-100 p-3 rounded-xl text-center">
+<span class="text-[10px] text-teal-600 font-bold uppercase tracking-wide">Último Local Aplicado</span>
+<p class="font-extrabold text-teal-800 text-sm mt-0.5" id="sugestao-local">Nenhum registro</p>
+</div>
+</div>
+</div>
+<!-- Tabela Detalhada de Clínicos -->
+<div class="glass-card p-6 rounded-2xl shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-bold text-base text-slate-800"><i class="fa-solid fa-list-check text-indigo-600 mr-2"></i>Histórico Completo de Biomarcadores</h3>
+<button class="text-xs text-rose-500 hover:text-rose-700 font-semibold transition-colors" onclick="limparHistoricoLocal()">
+<i class="fa-regular fa-trash-can mr-1"></i>Resetar Memória
+                    </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[700px]">
+<thead>
+<tr class="border-b border-slate-200 text-slate-400 text-xs uppercase font-semibold">
+<th class="py-3 px-4">Data</th>
+<th class="py-3 px-4">Peso / IMC</th>
+<th class="py-3 px-4">Dose / Local</th>
+<th class="py-3 px-4">Metas do Dia</th>
+<th class="py-3 px-4">Intestino</th>
+<th class="py-3 px-4">Sintomas &amp; Glicemia</th>
+</tr>
+</thead>
+<tbody class="text-xs divide-y divide-slate-100 text-slate-600" id="historico-tabela-corpo">
+<!-- Conteúdo dinâmico -->
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- ================= ABA 2: NOVO REGISTRO ================= -->
+<section class="hidden" id="tab-novo-registro">
+<div class="max-w-3xl mx-auto glass-card p-6 sm:p-8 rounded-3xl shadow-sm">
+<div class="text-center mb-6">
+<h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-plus text-emerald-600 mr-2"></i>Novo Registro Clínico Estendido</h3>
+<p class="text-xs text-slate-500 mt-1">Registre todas as métricas para alimentar a análise preditiva e o gráfico de saúde.</p>
+</div>
+<form class="space-y-6" id="registroForm" onsubmit="salvarNovoRegistro(event)">
+<!-- Grupo 1: Data e Medidas Corporais -->
+<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase">Data da Leitura</label>
+<input class="mt-1.5 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" id="form-data" required="" type="date"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase">Peso Atual (kg)</label>
+<input class="mt-1.5 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" id="form-peso" placeholder="Ex: 85.3" required="" step="0.1" type="number"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase">Glicemia (mg/dL) - Opcional</label>
+<input class="mt-1.5 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" id="form-glicemia" placeholder="Ex: 92" type="number"/>
+</div>
+</div>
+<!-- Grupo 2: Dose de Mounjaro -->
+<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase">Dose Aplicada hoje</label>
+<select class="mt-1.5 w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" id="form-dose" onchange="toggleLocalInput(this.value)">
+<option value="Apenas Peso">Nenhuma Dose (Apenas pesagem de controle)</option>
+<option value="2.5 mg">2.5 mg</option>
+<option value="5.0 mg">5.0 mg</option>
+<option value="7.5 mg">7.5 mg</option>
+<option value="10.0 mg">10.0 mg</option>
+<option value="12.5 mg">12.5 mg</option>
+<option value="15.0 mg">15.0 mg (Dose Máxima)</option>
+</select>
+</div>
+<div id="container-local-aplicacao">
+<label class="block text-xs font-bold text-slate-700 uppercase">Local da Aplicação</label>
+<select class="mt-1.5 w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" id="form-local">
+<option value="Abdômen Direito">Abdômen Direito</option>
+<option value="Abdômen Esquerdo">Abdômen Esquerdo</option>
+<option value="Coxa Direita">Coxa Direita</option>
+<option value="Coxa Esquerda">Coxa Esquerda</option>
+<option value="Braço Direito">Braço Direito</option>
+<option value="Braço Esquerdo">Braço Esquerdo</option>
+</select>
+</div>
+</div>
+<!-- Grupo 3: Metas Nutricionais & de Bem-estar -->
+<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+<h4 class="text-xs font-bold text-slate-700 uppercase mb-3">Estilo de Vida &amp; Nutrição</h4>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div>
+<label class="text-[10px] font-bold text-slate-500">ÁGUA INGERIDA (Litros)</label>
+<input class="mt-1 w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs" id="form-agua" placeholder="Ex: 2.8" step="0.1" type="number"/>
+</div>
+<div>
+<label class="text-[10px] font-bold text-slate-500">PROTEÍNA (Gramas)</label>
+<input class="mt-1 w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs" id="form-proteina" placeholder="Ex: 110" step="1" type="number"/>
+</div>
+<div>
+<label class="text-[10px] font-bold text-slate-500">SONO (Horas)</label>
+<input class="mt-1 w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs" id="form-sono" placeholder="Ex: 7.5" step="0.5" type="number"/>
+</div>
+<div>
+<label class="text-[10px] font-bold text-slate-500">TRÂNSITO INTESTINAL</label>
+<select class="mt-1 w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs" id="form-intestino">
+<option value="Normal">Normal / Saudável</option>
+<option value="Constipado">Constipado (Preso)</option>
+<option value="Solto">Diarreico / Muito Solto</option>
+<option value="Sem atividade">Nenhum evento hoje</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Grupo 4: Sintomas Avançados e Escalas de Efeitos -->
+<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+<h4 class="text-xs font-bold text-slate-700 uppercase mb-3">Gravidade de Efeitos Colaterais</h4>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div>
+<label class="text-[10px] font-bold text-slate-500 uppercase">Náusea / Enjoo</label>
+<select class="mt-1 w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs" id="col-nausea">
+<option value="Nenhum">0 - Nenhum</option>
+<option value="Leve">1 - Leve</option>
+<option value="Moderado">2 - Moderado</option>
+<option value="Severo">3 - Forte</option>
+</select>
+</div>
+<div>
+<label class="text-[10px] font-bold text-slate-500 uppercase">Azia ou Refluxo</label>
+<select class="mt-1 w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs" id="col-azia">
+<option value="Nenhum">0 - Nenhum</option>
+<option value="Leve">1 - Leve</option>
+<option value="Moderado">2 - Moderado</option>
+<option value="Severo">3 - Forte</option>
+</select>
+</div>
+<div>
+<label class="text-[10px] font-bold text-slate-500 uppercase">Fadiga / Cansaço</label>
+<select class="mt-1 w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs" id="col-fadiga">
+<option value="Nenhum">0 - Nenhum</option>
+<option value="Leve">1 - Leve</option>
+<option value="Moderado">2 - Moderado</option>
+<option value="Severo">3 - Forte</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Notas Clínicas -->
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase">Observações Gerais &amp; Diário de Alimentação</label>
+<textarea class="mt-1.5 w-full border border-slate-200 rounded-2xl px-4 py-3 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="form-notas" placeholder="Insira dados de exames de sangue, nível de fome (escala 1 a 10), bem estar emocional ou treino do dia..." rows="3"></textarea>
+</div>
+<button class="w-full bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-all text-xs uppercase tracking-wide" type="submit">
+<i class="fa-regular fa-floppy-disk mr-2"></i>Salvar Registro Clínico
+                    </button>
+</form>
+</div>
+</section>
+<!-- ================= ABA 3: SERINGA INTERATIVA ================= -->
+<section class="hidden" id="tab-seringa">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+<!-- Configurador da Aspiração -->
+<div class="glass-card p-6 sm:p-8 rounded-3xl shadow-sm flex flex-col justify-between">
+<div>
+<h3 class="text-lg font-bold text-slate-800 mb-1"><i class="fa-solid fa-vial text-teal-600 mr-2"></i>Calculadora e Aspiração de Seringas</h3>
+<p class="text-xs text-slate-500 mb-6">Muitos pacientes utilizam frascos multidose. Insira os dados abaixo para saber exatamente quantas **unidades** de insulina equivalem à sua miligramagem (mg) prescrita de Mounjaro.</p>
+<div class="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+<!-- Tipo de Seringa -->
+<div>
+<label class="text-xs font-bold text-slate-700">1. MODELO DA SERINGA</label>
+<select class="mt-1.5 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs" id="seringa-tipo" onchange="calcularSeringa()">
+<option value="0.5">Seringa de 0,5 ml (Capacidade: 50 Unidades)</option>
+<option selected="" value="1.0">Seringa de 1,0 ml (Capacidade: 100 Unidades)</option>
+</select>
+</div>
+<!-- Concentração do Frasco -->
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-xs font-bold text-slate-700">2. QUANTIDADE NO FRASCO (mg)</label>
+<input class="mt-1.5 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs" id="vial-mg" oninput="calcularSeringa()" placeholder="Ex: 10" type="number" value="10"/>
+</div>
+<div>
+<label class="text-xs font-bold text-slate-700">3. VOLUME DO FRASCO (ml)</label>
+<input class="mt-1.5 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs" id="vial-ml" oninput="calcularSeringa()" placeholder="Ex: 1.0" step="0.1" type="number" value="1.0"/>
+</div>
+</div>
+<!-- Dose Prescrita -->
+<div>
+<label class="text-xs font-bold text-slate-700">4. DOSE PRESCRITA DESEJADA (mg)</label>
+<input class="mt-1.5 w-full border border-slate-200 rounded-xl px-3 py-2 text-xs" id="dose-alvo" oninput="calcularSeringa()" placeholder="Ex: 2.5" step="0.1" type="number" value="2.5"/>
+</div>
+</div>
+<!-- Caixa de Resultados -->
+<div class="mt-6 bg-teal-50 border border-teal-200 p-4 rounded-2xl text-center">
+<span class="text-xs font-bold text-teal-700 block">Aspiração Necessária</span>
+<div class="flex items-baseline justify-center gap-2 mt-2">
+<span class="text-3xl font-extrabold text-teal-800" id="calc-unidades">25</span>
+<span class="text-sm font-semibold text-teal-600">Unidades (UI)</span>
+</div>
+<p class="text-[10px] text-teal-600 font-semibold mt-1" id="calc-ml">Isso equivale a 0.25 mL de líquido</p>
+</div>
+</div>
+<div class="mt-6 bg-slate-100 p-4 rounded-xl border border-slate-200">
+<h4 class="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-2">
+<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>Atenção à Aplicação
+                        </h4>
+<p class="text-[10px] text-slate-500 leading-relaxed">Seringas de insulina usam a escala **U-100** onde 100 unidades equivalem exatamente a 1.0ml. Nunca mude sua dose sem indicação expressa do seu médico endocrinologista.</p>
+</div>
+</div>
+<!-- Ilustrador da Seringa em Tempo Real -->
+<div class="glass-card p-6 sm:p-8 rounded-3xl shadow-sm flex flex-col items-center justify-between">
+<h3 class="text-base font-bold text-slate-800 text-center w-full mb-4">Representação Visual de Medição</h3>
+<div class="relative w-full flex justify-center bg-slate-50 rounded-2xl p-6 border border-slate-100 h-[380px]">
+<!-- Seringa Desenha com SVG -->
+<svg class="overflow-visible" height="340" id="syringe-svg" viewbox="0 0 120 340" width="120">
+<!-- Corpo da Seringa (Vidro transparente) -->
+<rect fill="#ffffff" height="260" opacity="0.9" rx="3" stroke="#94a3b8" stroke-width="4" width="50" x="35" y="20"></rect>
+<!-- Bico da seringa -->
+<path d="M50,10 L70,10 L65,20 L55,20 Z" fill="#64748b" stroke="#475569" stroke-width="2"></path>
+<line stroke="#94a3b8" stroke-width="2" x1="60" x2="60" y1="5" y2="10"></line>
+<!-- Líquido / Medicamento (Se adapta dinamicamente) -->
+<rect class="syringe-fluid" fill="rgba(13, 148, 136, 0.25)" height="65" id="visual-fluid" width="46" x="37" y="20"></rect>
+<!-- Riscos Graduados (Linhas da Seringa) -->
+<g id="syringe-graduations" stroke="#475569" stroke-width="1.5">
+<!-- Gerado dinamicamente pelo JS baseado no tipo de seringa -->
+</g>
+<!-- Êmbolo / Pistão de borracha preta -->
+<rect class="syringe-fluid" fill="#1e293b" height="15" id="visual-rubber" rx="1" width="48" x="36" y="85"></rect>
+<!-- Haste metálica/plástica do êmbolo -->
+<line class="syringe-fluid" id="visual-shaft" stroke="#cbd5e1" stroke-width="10" x1="60" x2="60" y1="100" y2="330"></line>
+<!-- Base de empurre -->
+<rect class="syringe-fluid" fill="#cbd5e1" height="8" id="visual-plunger-base" rx="2" width="70" x="25" y="325"></rect>
+</svg>
+<!-- Indicador flutuante de unidades selecionadas -->
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 items-center bg-white p-3 rounded-xl border border-slate-200 shadow-md">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aspirar até:</span>
+<span class="text-xl font-extrabold text-teal-600" id="badge-unidades">25 UI</span>
+<div class="w-8 h-0.5 bg-slate-200"></div>
+<span class="text-[9px] text-slate-500 font-semibold text-center" id="badge-tipo-seringa">Seringa 1ml</span>
+</div>
+</div>
+<div class="w-full text-center mt-4">
+<p class="text-xs text-slate-500">Use os controles do lado esquerdo para animar a seringa</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= ABA 4: AI COMPANION (GEMINI INTEGRATION) ================= -->
+<section class="hidden" id="tab-ai-companion">
+<div class="max-w-3xl mx-auto glass-card p-6 sm:p-8 rounded-3xl shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<div class="bg-gradient-to-tr from-teal-500 to-emerald-500 text-white p-3 rounded-2xl shadow-md">
+<i class="fa-solid fa-robot text-2xl"></i>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-800">IA Saúde Companion</h3>
+<p class="text-xs text-slate-500">Inteligência Artificial real integrada para analisar seu histórico clínico.</p>
+</div>
+</div>
+<!-- Painel de Prompt e Interações de IA -->
+<div class="space-y-4">
+<div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 min-h-[150px] max-h-[350px] overflow-y-auto" id="ai-chat-output">
+<div class="text-xs text-slate-500 italic text-center py-8">
+                            Nenhum questionamento clínico feito ainda. Use um dos atalhos rápidos ou digite sua dúvida personalizada sobre o Mounjaro abaixo.
+                        </div>
+</div>
+<!-- Botões Rápidos de Prompt Clínico -->
+<div class="flex flex-wrap gap-2">
+<button class="w-auto flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 transition-colors" onclick="perguntarIA('Analisar meu histórico recente de sintomas e peso e me dar uma visão geral.')">
+                            🔍 Analisar Meu Histórico
+                        </button>
+<button class="w-auto flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 transition-colors" onclick="perguntarIA('Estou com náuseas leves. Quais estratégias de alimentação posso seguir para melhorar sem interromper a terapia?')">
+                            🤢 Dicas para Náuseas
+                        </button>
+<button class="w-auto flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 transition-colors" onclick="perguntarIA('Sugira 3 receitas rápidas e hiperproteicas para lanche da tarde que auxiliem na saciedade e previnam a perda muscular.')">
+                            🍳 Lanches com Alta Proteína
+                        </button>
+</div>
+<!-- Caixa de Input de Texto da IA -->
+<div class="flex gap-2">
+<input class="w-full border border-slate-200 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none" id="ai-input" placeholder="Digite uma dúvida sobre Mounjaro, efeitos, alimentação..." type="text"/>
+<button class="mt-0 w-24 bg-gradient-to-r from-teal-600 to-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1" onclick="perguntarCustomIA()">
+<i class="fa-solid fa-paper-plane"></i> Enviar
+                        </button>
+</div>
+</div>
+<div class="mt-6 bg-amber-50 border border-amber-100 p-4 rounded-xl text-[10px] text-amber-700 flex items-start gap-2">
+<i class="fa-solid fa-circle-exclamation text-base mt-0.5"></i>
+<p class="leading-relaxed">**Isenção de Responsabilidade Médica:** Esta inteligência artificial atua exclusivamente como apoio informativo de saúde baseado em diretrizes públicas e nos dados inseridos por você. Suas respostas **nunca** substituem a orientação diagnóstica e a prescrição do seu médico endocrinologista responsável pelo seu tratamento.</p>
+</div>
+</div>
+</section>
+<!-- ================= ABA 5: CONECTAR PLANILHA ================= -->
+<section class="hidden" id="tab-google-config">
+<div class="max-w-3xl mx-auto glass-card p-6 sm:p-8 rounded-3xl shadow-sm space-y-6">
+<div>
+<h3 class="text-xl font-bold text-slate-800 mb-1"><i class="fa-brands fa-google text-emerald-600 mr-2"></i>Conexão Google Planilhas</h3>
+<p class="text-xs text-slate-500">Mantenha seus dados seguros na nuvem em tempo real usando o Google Apps Script.</p>
+</div>
+<!-- Tabela de colunas recomendada -->
+<div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl">
+<h4 class="font-bold text-emerald-800 text-xs mb-3">1. Crie uma aba chamada "Registros" na sua planilha com os seguintes cabeçalhos exatos na linha 1:</h4>
+<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center">
+<div class="bg-white p-2 rounded-lg border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">A<br/><span class="text-[9px] text-slate-400">Data</span></div>
+<div class="bg-white p-2 rounded-lg border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">B<br/><span class="text-[9px] text-slate-400">Peso</span></div>
+<div class="bg-white p-2 rounded-lg border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">C<br/><span class="text-[9px] text-slate-400">Dose</span></div>
+<div class="bg-white p-2 rounded-lg border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">D<br/><span class="text-[9px] text-slate-400">Local</span></div>
+<div class="bg-white p-2 rounded-lg border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">E<br/><span class="text-[9px] text-slate-400">Agua</span></div>
+<div class="bg-white p-2 rounded-lg border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">F<br/><span class="text-[9px] text-slate-400">Proteina</span></div>
+<div class="bg-white p-2 rounded-lg border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">G<br/><span class="text-[9px] text-slate-400">Intestino</span></div>
+<div class="bg-white p-2 rounded-lg border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">H<br/><span class="text-[9px] text-slate-400">Sintomas</span></div>
+</div>
+</div>
+<!-- Código Apps Script atualizado -->
+<div class="space-y-2">
+<h4 class="font-bold text-slate-700 text-xs">2. Substitua o código de gravação do seu `Código.gs` pelo código abaixo:</h4>
+<pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-[11px] overflow-x-auto max-h-56 font-mono">
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('Index')
+      .setTitle('Mounjaro Clínico Pro')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function salvarDados(dados) {
+  var idPlanilha = SpreadsheetApp.getActiveSpreadsheet().getId();
+  var planilha = SpreadsheetApp.openById(idPlanilha).getSheetByName("Registros");
+  
+  planilha.appendRow([
+    dados.data,
+    dados.peso,
+    dados.dose,
+    dados.local,
+    dados.agua,
+    dados.proteina,
+    dados.intestino,
+    "Nausea: " + dados.nausea + ", Azia: " + dados.azia + ", Fadiga: " + dados.fadiga + ", Glicemia: " + dados.glicemia,
+    dados.notas
+  ]);
+  
+  return "Registro gravado com sucesso no Google Planilhas!";
+}</pre>
+</div>
+</div>
+</section>
+</main>
+<!-- Script de lógica e simulação -->
+<script>
+        let registros = [];
+
+        // Base de dados inicial ilustrativa de alta fidelidade
+        const mockData = [
+            { data: '2026-06-01', peso: '98.5', dose: '2.5 mg', local: 'Abdômen Esquerdo', agua: '2.5', proteina: '90', intestino: 'Normal', glicemia: '96', nausea: 'Leve', azia: 'Nenhum', fadiga: 'Nenhum', notas: 'Início do tratamento com 2.5mg.' },
+            { data: '2026-06-08', peso: '97.1', dose: '2.5 mg', local: 'Coxa Direita', agua: '2.8', proteina: '100', intestino: 'Normal', glicemia: '92', nausea: 'Moderado', azia: 'Leve', fadiga: 'Leve', notas: 'Senti náusea leve no 2º dia após a aplicação.' },
+            { data: '2026-06-15', peso: '96.2', dose: '2.5 mg', local: 'Abdômen Direito', agua: '3.0', proteina: '105', intestino: 'Constipado', glicemia: '88', nausea: 'Nenhum', azia: 'Nenhum', fadiga: 'Nenhum', notas: 'Aumento de ingestão proteica melhorou a disposição.' },
+            { data: '2026-06-22', peso: '95.0', dose: '2.5 mg', local: 'Coxa Esquerda', agua: '2.5', proteina: '95', intestino: 'Normal', glicemia: '90', nausea: 'Nenhum', azia: 'Nenhum', fadiga: 'Nenhum', notas: 'Última dose de 2.5mg.' },
+            { data: '2026-06-29', peso: '93.8', dose: '5.0 mg', local: 'Abdômen Esquerdo', agua: '3.2', proteina: '110', intestino: 'Normal', glicemia: '85', nausea: 'Moderado', azia: 'Leve', fadiga: 'Moderado', notas: 'Subida de dose para 5mg. Fadiga visível no dia seguinte.' }
+        ];
+
+        let weightChartInst = null;
+
+        window.onload = function() {
+            // Sincronizar com LocalStorage (inicia vazio até o usuário adicionar dados)
+            const localStored = localStorage.getItem('mounjaro_pro_v2');
+            if (localStored) {
+                registros = JSON.parse(localStored);
+            } else {
+                registros = [];
+            }
+
+            // Data atual para o formulário
+            document.getElementById('form-data').value = new Date().toISOString().substring(0, 10);
+
+            // Iniciar com cálculos da seringa e do dashboard
+            calcularSeringa();
+            atualizarDashboard();
+        };
+
+        function switchTab(tabId) {
+            // Esconder todas
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-novo-registro').classList.add('hidden');
+            document.getElementById('tab-seringa').classList.add('hidden');
+            document.getElementById('tab-ai-companion').classList.add('hidden');
+            document.getElementById('tab-google-config').classList.add('hidden');
+
+            // Mostrar a selecionada
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Estilizar botões do menu
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-white/20');
+                btn.classList.add('bg-white/10');
+            });
+            document.getElementById(`btn-${tabId}`).classList.add('bg-white/20');
+            document.getElementById(`btn-${tabId}`).classList.remove('bg-white/10');
+
+            if (tabId === 'dashboard') {
+                atualizarDashboard();
+            }
+        }
+
+        function toggleLocalInput(val) {
+            const container = document.getElementById('container-local-aplicacao');
+            if (val === 'Apenas Peso') {
+                container.classList.add('opacity-30', 'pointer-events-none');
+            } else {
+                container.classList.remove('opacity-30', 'pointer-events-none');
+            }
+        }
+
+        function salvarNovoRegistro(e) {
+            e.preventDefault();
+
+            const data = document.getElementById('form-data').value;
+            const peso = parseFloat(document.getElementById('form-peso').value).toFixed(1);
+            const glicemia = document.getElementById('form-glicemia').value || 'Não informado';
+            const dose = document.getElementById('form-dose').value;
+            const local = dose === 'Apenas Peso' ? 'N/A' : document.getElementById('form-local').value;
+            const agua = document.getElementById('form-agua').value || '0';
+            const proteina = document.getElementById('form-proteina').value || '0';
+            const intestino = document.getElementById('form-intestino').value;
+            const nausea = document.getElementById('col-nausea').value;
+            const azia = document.getElementById('col-azia').value;
+            const fadiga = document.getElementById('col-fadiga').value;
+            const notas = document.getElementById('form-notas').value || 'Nenhuma nota registrada.';
+
+            const novoReg = { data, peso, dose, local, agua, proteina, intestino, glicemia, nausea, azia, fadiga, notas };
+            registros.push(novoReg);
+            
+            // Reordenar cronologicamente
+            registros.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+            // Salvar na memória
+            localStorage.setItem('mounjaro_pro_v2', JSON.stringify(registros));
+
+            // Limpar formulário de entrada
+            document.getElementById('form-peso').value = '';
+            document.getElementById('form-glicemia').value = '';
+            document.getElementById('form-agua').value = '';
+            document.getElementById('form-proteina').value = '';
+            document.getElementById('form-sono').value = '';
+            document.getElementById('form-notas').value = '';
+
+            // Se estiver rodando dentro do Apps Script, envia os dados para a planilha real também
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run
+                    .withSuccessHandler(function(res) {
+                        console.log("Sincronizado no Google Sheets com sucesso!");
+                    })
+                    .salvarDados(novoReg);
+            }
+
+            switchTab('dashboard');
+        }
+
+        function atualizarDashboard() {
+            const chartPanel = document.getElementById('chart-panel');
+            const chartEmpty = document.getElementById('chart-empty');
+
+            // Sem dados: mostrar estado vazio e limpar métricas
+            if (registros.length === 0) {
+                chartPanel.classList.add('hidden');
+                chartPanel.classList.remove('flex');
+                chartEmpty.classList.remove('hidden');
+                chartEmpty.classList.add('flex');
+
+                document.getElementById('stat-peso-atual').innerText = '-- kg';
+                document.getElementById('stat-eliminado').innerText = '--';
+                document.getElementById('stat-agua').innerText = '-- L';
+                document.getElementById('stat-proteina').innerText = '-- g';
+                document.getElementById('stat-intestino').innerText = 'Nenhum Registro';
+                document.getElementById('sugestao-local').innerText = 'Nenhum registro';
+                colorirRodizioDiagrama('N/A');
+                document.getElementById('historico-tabela-corpo').innerHTML =
+                    '<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">Nenhum registro ainda. Adicione dados na aba Registrar.</td></tr>';
+                if (weightChartInst) { weightChartInst.destroy(); weightChartInst = null; }
+                return;
+            }
+
+            // Com dados: mostrar gráfico
+            chartEmpty.classList.add('hidden');
+            chartEmpty.classList.remove('flex');
+            chartPanel.classList.remove('hidden');
+            chartPanel.classList.add('flex');
+
+            // Ordenação garantida
+            registros.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+            const inicialReg = registros[0];
+            const atualReg = registros[registros.length - 1];
+
+            const pInicial = parseFloat(inicialReg.peso);
+            const pAtual = parseFloat(atualReg.peso);
+            const diferenca = (pInicial - pAtual).toFixed(1);
+            const diferencaPct = ((diferenca / pInicial) * 100).toFixed(1);
+
+            document.getElementById('stat-peso-atual').innerText = `${pAtual} kg`;
+            document.getElementById('stat-eliminado').innerText = `-${diferenca} kg (-${diferencaPct}%)`;
+
+            // Água e proteínas médias das últimas 3 leituras
+            const ultimos3 = registros.slice(-3);
+            let totalAgua = 0;
+            let totalProt = 0;
+            ultimos3.forEach(r => {
+                totalAgua += parseFloat(r.agua || 0);
+                totalProt += parseFloat(r.proteina || 0);
+            });
+            const medAgua = (totalAgua / Math.max(1, ultimos3.length)).toFixed(1);
+            const medProt = (totalProt / Math.max(1, ultimos3.length)).toFixed(0);
+
+            document.getElementById('stat-agua').innerText = `${medAgua} L`;
+            document.getElementById('stat-proteina').innerText = `${medProt} g`;
+
+            // Status intestinal mais frequente
+            const intestinoOcorrencias = ultimos3.map(r => r.intestino).filter(v => v);
+            const frequenciaIntestino = intestinoOcorrencias.length > 0 ? intestinoOcorrencias[intestinoOcorrencias.length - 1] : "Nenhum";
+            document.getElementById('stat-intestino').innerText = frequenciaIntestino;
+
+            // Encontrar último local utilizado de injeção ativa
+            let ultimoLocal = "N/A";
+            for (let i = registros.length - 1; i >= 0; i--) {
+                if (registros[i].dose !== 'Apenas Peso') {
+                    ultimoLocal = registros[i].local;
+                    break;
+                }
+            }
+
+            // Mostrar o local informado pelo usuário na última aplicação
+            document.getElementById('sugestao-local').innerText = (ultimoLocal && ultimoLocal !== 'N/A') ? ultimoLocal : 'Nenhuma aplicação';
+
+            // Colorir diagrama com base na última aplicação
+            colorirRodizioDiagrama(ultimoLocal);
+
+            // Desenhar histórico na tabela
+            desenharTabelaClínica();
+
+            // Renderizar gráficos complexos de correlação
+            desenharGraficoDashboard();
+        }
+
+        function colorirRodizioDiagrama(ultimoLocal) {
+            document.querySelectorAll('.body-part').forEach(el => {
+                el.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-700', 'bg-emerald-500', 'border-emerald-600');
+                el.classList.add('bg-white', 'text-slate-600', 'border-slate-300');
+            });
+
+            const mapLocais = {
+                "Abdômen Direito": "body-abs-r",
+                "Abdômen Esquerdo": "body-abs-l",
+                "Coxa Direita": "body-thigh-r",
+                "Coxa Esquerda": "body-thigh-l",
+                "Braço Direito": "body-arm-r",
+                "Braço Esquerdo": "body-arm-l"
+            };
+
+            const idUltimo = mapLocais[ultimoLocal];
+            if (idUltimo) {
+                const el = document.getElementById(idUltimo);
+                if (el) {
+                    el.classList.remove('bg-white', 'text-slate-600', 'border-slate-300');
+                    el.classList.add('bg-indigo-600', 'text-white', 'border-indigo-700');
+                }
+            }
+        }
+
+        function desenharTabelaClínica() {
+            const corpo = document.getElementById('historico-tabela-corpo');
+            corpo.innerHTML = '';
+
+            [...registros].reverse().forEach(reg => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+                
+                // Formatar data
+                const partes = reg.data.split('-');
+                const dataFormatada = partes.length === 3 ? `${partes[2]}/${partes[1]}` : reg.data;
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-700">${dataFormatada}</td>
+                    <td class="py-3 px-4"><span class="bg-slate-100 px-2 py-1 rounded-md text-slate-800 font-semibold">${reg.peso} kg</span></td>
+                    <td class="py-3 px-4">
+                        <span class="text-teal-700 font-bold">${reg.dose}</span><br>
+                        <span class="text-[10px] text-slate-400">${reg.local || 'N/A'}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="text-blue-600 font-bold">💧 ${reg.agua || '0'}L</span> | 
+                        <span class="text-amber-600 font-bold">🥩 ${reg.proteina || '0'}g</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${reg.intestino === 'Constipado' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${reg.intestino || 'Normal'}</span>
+                    </td>
+                    <td class="py-3 px-4 text-[10px]">
+                        Nausea: <span class="font-bold text-slate-700">${reg.nausea || 'Nenhuma'}</span> | 
+                        Azia: <span class="font-bold text-slate-700">${reg.azia || 'Nenhuma'}</span><br>
+                        Glicemia: <span class="font-bold text-emerald-600">${reg.glicemia || '---'} mg/dL</span>
+                    </td>
+                `;
+                corpo.appendChild(tr);
+            });
+        }
+
+        function desenharGraficoDashboard() {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            if (weightChartInst) weightChartInst.destroy();
+
+            const datas = registros.map(r => {
+                const p = r.data.split('-');
+                return p.length === 3 ? `${p[2]}/${p[1]}` : r.data;
+            });
+            const pesos = registros.map(r => parseFloat(r.peso));
+            const proteinas = registros.map(r => parseFloat(r.proteina || 0));
+
+            weightChartInst = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: datas,
+                    datasets: [
+                        {
+                            label: 'Peso Corporal (kg)',
+                            data: pesos,
+                            borderColor: '#0d9488',
+                            backgroundColor: 'rgba(13, 148, 136, 0.05)',
+                            borderWidth: 3,
+                            yAxisID: 'y',
+                            tension: 0.25,
+                            fill: true
+                        },
+                        {
+                            label: 'Ingestão Proteica (g)',
+                            data: proteinas,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 1.5,
+                            type: 'bar',
+                            yAxisID: 'y1',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Peso (kg)', font: { size: 10, weight: 'bold' } }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'Proteína (g)', font: { size: 10, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function calcularSeringa() {
+            const tipoSeringa = parseFloat(document.getElementById('seringa-tipo').value); // 0.5 ou 1.0 ml
+            const vialMg = parseFloat(document.getElementById('vial-mg').value) || 10;
+            const vialMl = parseFloat(document.getElementById('vial-ml').value) || 1.0;
+            const doseAlvo = parseFloat(document.getElementById('dose-alvo').value) || 2.5;
+
+            // 1. Calcular a concentração em mg/mL
+            const concentracao = vialMg / vialMl; 
+            
+            // 2. Calcular o volume necessário em mL
+            const volumeMl = doseAlvo / concentracao;
+
+            // 3. Converter mL para Unidades na seringa de insulina (onde 1ml = 100 unidades)
+            const unidades = Math.round(volumeMl * 100);
+
+            // Atualização dos textos de resultados
+            document.getElementById('calc-unidades').innerText = unidades;
+            document.getElementById('calc-ml').innerText = `Isso equivale a ${volumeMl.toFixed(3)} mL de líquido`;
+            document.getElementById('badge-unidades').innerText = `${unidades} UI`;
+            document.getElementById('badge-tipo-seringa').innerText = tipoSeringa === 0.5 ? "Seringa 0.5ml" : "Seringa 1.0ml";
+
+            // Renderizar risquinhos da seringa e mover o êmbolo
+            renderizarSeringaSvg(unidades, tipoSeringa);
+        }
+
+        function renderizarSeringaSvg(unidades, tipoSeringa) {
+            const maxUnidades = tipoSeringa === 0.5 ? 50 : 100;
+            const containerMarcas = document.getElementById('syringe-graduations');
+            containerMarcas.innerHTML = '';
+
+            const inicioY = 20; // Topo do cilindro
+            const alturaCilindro = 260; // Altura total do cilindro
+
+            // Gerar marcas graduadas dinamicamente
+            for (let i = 0; i <= maxUnidades; i++) {
+                if (i % 5 === 0) { // Riscos maiores para múltiplos de 5
+                    const y = inicioY + (i / maxUnidades) * alturaCilindro;
+                    
+                    // Risco esquerdo
+                    const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line1.setAttribute("x1", "35");
+                    line1.setAttribute("y1", y);
+                    line1.setAttribute("x2", "50");
+                    line1.setAttribute("y2", y);
+                    containerMarcas.appendChild(line1);
+
+                    // Adicionar número indicativo nas dezenas
+                    if (i % 10 === 0) {
+                        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        txt.setAttribute("x", "22");
+                        txt.setAttribute("y", y + 3);
+                        txt.setAttribute("font-size", "8px");
+                        txt.setAttribute("font-weight", "bold");
+                        txt.setAttribute("fill", "#1e293b");
+                        txt.textContent = i;
+                        containerMarcas.appendChild(txt);
+                    }
+                } else { // Riscos menores
+                    const y = inicioY + (i / maxUnidades) * alturaCilindro;
+                    const line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line2.setAttribute("x1", "35");
+                    line2.setAttribute("y1", y);
+                    line2.setAttribute("x2", "42");
+                    line2.setAttribute("y2", y);
+                    containerMarcas.appendChild(line2);
+                }
+            }
+
+            // Mover o líquido e a borracha do êmbolo conforme as unidades calculadas
+            const unidadeClamp = Math.min(maxUnidades, Math.max(0, unidades));
+            const porcentagemCheio = unidadeClamp / maxUnidades;
+            const alturaLiquido = porcentagemCheio * alturaCilindro;
+
+            // Elementos visuais
+            const visualFluid = document.getElementById('visual-fluid');
+            const visualRubber = document.getElementById('visual-rubber');
+            const visualShaft = document.getElementById('visual-shaft');
+            const visualPlungerBase = document.getElementById('visual-plunger-base');
+
+            // Ajustando líquido
+            visualFluid.setAttribute("height", alturaLiquido);
+            
+            // Ajustando borracha preta
+            const yBorracha = inicioY + alturaLiquido;
+            visualRubber.setAttribute("y", yBorracha);
+
+            // Ajustando haste e base
+            visualShaft.setAttribute("y1", yBorracha + 15);
+            visualShaft.setAttribute("y2", yBorracha + 245);
+            visualPlungerBase.setAttribute("y", yBorracha + 240);
+        }
+
+        async function perguntarIA(promptClínico) {
+            const output = document.getElementById('ai-chat-output');
+            output.innerHTML = `<div class="text-xs text-teal-600 flex items-center gap-2 justify-center py-6"><i class="fa-solid fa-spinner fa-spin text-lg"></i> O Gemini AI está analisando seu prontuário e histórico de saúde...</div>`;
+
+            // Preparar o histórico local do paciente como contexto para alimentar a IA
+            const historicoTexto = registros.map(r => `Data: ${r.data}, Peso: ${r.peso}kg, Dose: ${r.dose}, Local: ${r.local}, Agua: ${r.agua}L, Proteinas: ${r.proteina}g, Intestino: ${r.intestino}, Nausea: ${r.nausea}, Azia: ${r.azia}, Fadiga: ${r.fadiga}`).join('\n');
+
+            const systemPrompt = `Você é um Médico Endocrinologista e Assistente de Saúde Virtual especialista em terapias com peptídeos e análogos de receptor de GIP/GLP-1 (Mounjaro / tirzepatida). Forneça insights científicos ricos, precisos, incentivadores e empáticos. Analise o histórico do paciente que está sendo enviado e responda de forma muito estruturada em português. Se o paciente perguntar sobre receitas, dê receitas de lanches ou almoço fáceis de fazer e com muita proteína (essencial para reter massa muscular). Mantenha as diretrizes clínicas e de hidratação corretas.`;
+
+            const queryCompleta = `Aqui está meu histórico de registros recentes:\n${historicoTexto}\n\nMinha Dúvida ou Pedido: ${promptClínico}`;
+
+            // Chamada direta para o endpoint do Gemini 3.1 Flash utilizando a chave fornecida automaticamente pela plataforma
+            const apiKey = ""; // Deixe em branco conforme regra de segurança
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: queryCompleta }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (textResponse) {
+                    // Converter quebras de linha básicas para parágrafos HTML para exibição bonita
+                    const formatado = textResponse.replace(/\n/g, '<br>');
+                    output.innerHTML = `
+                        <div class="space-y-4 text-xs text-slate-700 leading-relaxed bg-white p-4 rounded-xl border border-slate-200">
+                            <span class="font-bold text-teal-600 uppercase tracking-widest text-[9px] block mb-2">Análise Clínica IA Gemini:</span>
+                            ${formatado}
+                        </div>
+                    `;
+                } else {
+                    output.innerHTML = `<div class="text-xs text-rose-500 py-4">Ocorreu um erro ao obter resposta da inteligência artificial. Verifique se o formato ou se a rede está ativa.</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                output.innerHTML = `<div class="text-xs text-rose-500 py-4">Erro de conexão ou timeout ao tentar falar com os servidores da IA. Tente novamente em instantes.</div>`;
+            }
+        }
+
+        function perguntarCustomIA() {
+            const input = document.getElementById('ai-input');
+            const texto = input.value.trim();
+            if (texto === "") return;
+            perguntarIA(texto);
+            input.value = '';
+        }
+
+        function limparHistoricoLocal() {
+            if (confirm('Deseja realmente apagar todos os registros? Esta ação não pode ser desfeita.')) {
+                localStorage.removeItem('mounjaro_pro_v2');
+                registros = [];
+                atualizarDashboard();
+            }
+        }
+
+        function reiniciarAplicativo() {
+            if (confirm('Reiniciar o aplicativo? Todos os dados serão apagados e você voltará ao início.')) {
+                localStorage.removeItem('mounjaro_pro_v2');
+                registros = [];
+                if (weightChartInst) { weightChartInst.destroy(); weightChartInst = null; }
+                document.getElementById('registroForm').reset();
+                document.getElementById('form-data').value = new Date().toISOString().substring(0, 10);
+                switchTab('dashboard');
+                atualizarDashboard();
+            }
+        }
+    </script>
+<script>if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./service-worker.js').then(reg=>{reg.update();setInterval(()=>reg.update(),60000);navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload());});});}</script></body>
+</html>
